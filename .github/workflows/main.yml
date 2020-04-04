@@ -1,5 +1,3 @@
-# This is a basic workflow to help you get started with Actions
-
 name: CI
 
 # Controls when the action will run. Triggers the workflow on push or pull request
@@ -10,7 +8,6 @@ on:
   pull_request:
     branches: [ master ]
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   test:
     runs-on: [ubuntu-latest]
@@ -23,7 +20,7 @@ jobs:
           node-version: '12.x'
           
       - name: Install Dependencies
-        run: npm install
+        run: npm ci
       
       - name: Run Test
         run: npm run test
@@ -43,7 +40,7 @@ jobs:
         node-version: '12.x'
       
     - name: Install Dependencies
-      run: npm install
+      run: npm ci
 
     - name: Run Build
       run: npm run build
@@ -56,13 +53,13 @@ jobs:
         echo "${GIT_DEPLOY_KEY}" > ~/.ssh/id_rsa && \
         chmod 400 ~/.ssh/id_rsa
         git init && \
-        git remote add deploy git@github.com:aman95/portfolio.git && \
+        git remote add deploy git@github.com:aman95/react-ci-demo.git && \
         git checkout -b gh-pages && \
         echo "${CUSTOM_DOMAIN}" > CNAME && \
         git config user.name "${GITHUB_ACTOR}" && \
         git config user.email "${GITHUB_ACTOR}@users.noreply.github.com" && \
         git add . && \
-        timestamp=$(date +%s%3N) && \
+        timestamp=$(date) && \
         git commit -m "Automated deployment to GitHub Pages on $timestamp" > /dev/null 2>&1 && \
         git push deploy gh-pages --force && \
         rm -fr .git && \
