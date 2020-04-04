@@ -28,8 +28,11 @@ jobs:
       - name: Run Test
         run: npm run test
 
-  build:
+  build-push:
     runs-on: ubuntu-latest
+    env:
+      GIT_DEPLOY_KEY: ${{secrets.CI_DEPLOY_KEY}}
+    needs: [test]
     steps:
     - uses: actions/checkout@v2
     
@@ -43,3 +46,22 @@ jobs:
 
     - name: Run Build
       run: npm run build
+    
+    - name: Push to gh-pages
+      run: |
+        cd build/
+        mkdir ~/.ssh
+        ssh-keyscan -t rsa github.com > ~/.ssh/known_hosts && \
+        echo "${GIT_DEPLOY_KEY}" > ~/.ssh/id_rsa && \
+        chmod 400 ~/.ssh/id_rsa
+        git init && \
+        git remote add deploy git@github.com:aman95/portfolio.git && \
+        git checkout gh-pages && \
+        git config user.name "${GITHUB_ACTOR}" && \
+        git config user.email "${GITHUB_ACTOR}@users.noreply.github.com" && \
+        git add . && \
+        timestamp=$(date +%s%3N) && \
+        git commit -m "Automated deployment to GitHub Pages on $timestamp" > /dev/null 2>&1 && \
+        git push deploy gh-pages --force && \
+        rm -fr .git && \
+        rm -f ~/.ssh/id_rsa
